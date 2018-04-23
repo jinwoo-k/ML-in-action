@@ -1,6 +1,7 @@
 from numpy import *
 import operator
 
+
 def createDataSet():
     group = array([[1.0, 1.1], [1.0, 1.0], [0, 0], [0, 0.1]])
     labels = ['A', 'A', 'B', 'B']
@@ -21,6 +22,10 @@ def classify0(inX, dataSet, labels, k):
                               key = operator.itemgetter(1), reverse = True)
     return sortedClassCount[0][0]
 
-group, labels = createDataSet()
-res = classify0([0, 0.2], group, labels, 3)
-print res
+# group, labels = createDataSet()
+# res = classify0([0, 0.2], group, labels, 3)
+# print res
+#
+# print tile(array([1, 1]), (2, 1))
+# print tile(array([1, 2]), (2, 3))
+
