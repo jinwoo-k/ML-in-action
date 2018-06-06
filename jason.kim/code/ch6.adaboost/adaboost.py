@@ -169,17 +169,19 @@ def plotROC(predStrengths, classLabels):
             delY = 0;
             ySum += cur[1]
         # draw line from cur to (cur[0]-delX,cur[1]-delY)
-        ax.plot([cur[0], cur[0] - delX], [cur[1], cur[1] - delY], c='b')
-        cur = (cur[0] - delX, cur[1] - delY)
+        newcur = (cur[0] - delX, cur[1] - delY)
+        ax.plot([cur[0], newcur[0]], [cur[1], newcur[1]], c='b')
+        cur = newcur
     ax.plot([0, 1], [0, 1], 'b--')
     plt.xlabel('False positive rate');
     plt.ylabel('True positive rate')
     plt.title('ROC curve for AdaBoost horse colic detection system')
     ax.axis([0, 1, 0, 1])
-    plt.show()
     print "the Area Under the Curve is: ", ySum * xStep
+    plt.show()
 
 
 dataArr, labelArr = loadDataSet('horseColicTraining2.txt')
-classifyArr, aggClassEst = adaBoostTrainDS(dataArr, labelArr, 40)
+classifyArr, aggClassEst = adaBoostTrainDS(dataArr, labelArr, 10)
+
 plotROC(aggClassEst.T, labelArr)
