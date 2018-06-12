@@ -80,22 +80,22 @@ def lwlrTestPlot(xArr,yArr,k=1.0):  #same thing as lwlrTest except it sorts X fi
         yHat[i] = lwlr(xCopy[i],xArr,yArr,k)
     return yHat,xCopy
 
-# xArr, yArr = loadDataSet('ex0.txt')
-# yHat = lwlrTest(xArr, xArr, yArr, 0.001)
-#
-# xMat = mat(xArr)
-# srtInd = xMat[:, 1].argsort(0)
-# xSort = xMat[srtInd][:, 0, :]
-#
-# import matplotlib
-# matplotlib.use('TkAgg')
-# import matplotlib.pyplot as plt
-#
-# fig = plt.figure()
-# ax = fig.add_subplot(111)
-# ax.plot(xSort[:, 1], yHat[srtInd])
-# ax.scatter(xMat[:, 1].flatten().A[0], mat(yArr).T[:, 0].flatten().A[0], s=2, c='red')
-# plt.show()
+xArr, yArr = loadDataSet('ex0.txt')
+yHat = lwlrTest(xArr, xArr, yArr, 0.05)
+
+xMat = mat(xArr)
+srtInd = xMat[:, 1].argsort(0)
+xSort = xMat[srtInd][:, 0, :]
+
+import matplotlib
+matplotlib.use('TkAgg')
+import matplotlib.pyplot as plt
+
+fig = plt.figure()
+ax = fig.add_subplot(111)
+ax.plot(xSort[:, 1], yHat[srtInd])
+ax.scatter(xMat[:, 1].flatten().A[0], mat(yArr).T[:, 0].flatten().A[0], s=2, c='red')
+plt.show()
 
 
 
