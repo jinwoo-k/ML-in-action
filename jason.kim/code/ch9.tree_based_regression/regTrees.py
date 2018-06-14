@@ -5,7 +5,6 @@ Tree-Based Regression Methods
 '''
 from numpy import *
 
-
 def loadDataSet(fileName):      #general function to parse tab -delimited floats
     dataMat = []                #assume last column is target value
     fr = open(fileName)
@@ -20,62 +19,68 @@ def binSplitDataSet(dataSet, feature, value):
     m1 = dataSet[nonzero(dataSet[:,feature] <= value)[0],:]
     return m0, m1
 
-
-def regLeaf(dataSet): #returns the value used for each leaf
+def regLeaf(dataSet):#returns the value used for each leaf
     return mean(dataSet[:,-1])
 
 def regErr(dataSet):
-    return var(dataSet[:,-1]) * shape(dataSet)[0] # return sum of deviation
+    return var(dataSet[:,-1]) * shape(dataSet)[0]
 
 def linearSolve(dataSet):   #helper function used in two places
-    m, n = shape(dataSet)
-    X = mat(ones((m, n)))
-    # Y = mat(ones((m, 1)))
-
-    #create a copy of data with 1 in 0th postion and strip out Y
-    X[:, 1:n] = dataSet[:, 0:n-1]
-    Y = dataSet[:, -1]
+    m,n = shape(dataSet)
+    X = mat(ones((m,n))); Y = mat(ones((m,1)))#create a copy of data with 1 in 0th postion
+    X[:,1:n] = dataSet[:,0:n-1]; Y = dataSet[:,-1]#and strip out Y
     xTx = X.T*X
     if linalg.det(xTx) == 0.0:
         raise NameError('This matrix is singular, cannot do inverse,\n\
         try increasing the second value of ops')
     ws = xTx.I * (X.T * Y)
-    return ws, X, Y
+    return ws,X,Y
 
-def modelLeaf(dataSet): #create linear model and return coeficients
-    ws, X, Y = linearSolve(dataSet)
+def modelLeaf(dataSet):#create linear model and return coeficients
+    ws,X,Y = linearSolve(dataSet)
     return ws
 
 def modelErr(dataSet):
-    ws, X, Y = linearSolve(dataSet)
+    ws,X,Y = linearSolve(dataSet)
     yHat = X * ws
-    return sum(power(Y - yHat, 2))
+    return sum(power(Y - yHat,2))
 
 def chooseBestSplit(dataSet, leafType=regLeaf, errType=regErr, ops=(1,4)):
-    tolS = ops[0]; tolN = ops[1]
+    tolS = ops[0]
+    tolN = ops[1]
+
     #if all the target variables are the same value: quit and return value
     if len(set(dataSet[:,-1].T.tolist()[0])) == 1: #exit cond 1
         return None, leafType(dataSet)
-    m,n = shape(dataSet)
+
+    m, n = shape(dataSet)
+
     #the choice of the best feature is driven by Reduction in RSS error from mean
     S = errType(dataSet)
     bestS = inf; bestIndex = 0; bestValue = 0
     for featIndex in range(n-1):
         for splitVal in set(dataSet[:,featIndex].flat):
             mat0, mat1 = binSplitDataSet(dataSet, featIndex, splitVal)
-            if (shape(mat0)[0] < tolN) or (shape(mat1)[0] < tolN): continue
+
+            if (shape(mat0)[0] < tolN) or (shape(mat1)[0] < tolN):
+                continue
+
             newS = errType(mat0) + errType(mat1)
             if newS < bestS:
                 bestIndex = featIndex
                 bestValue = splitVal
                 bestS = newS
+
     #if the decrease (S-bestS) is less than a threshold don't do the split
     if (S - bestS) < tolS:
         return None, leafType(dataSet) #exit cond 2
+
     mat0, mat1 = binSplitDataSet(dataSet, bestIndex, bestValue)
     if (shape(mat0)[0] < tolN) or (shape(mat1)[0] < tolN):  #exit cond 3
         return None, leafType(dataSet)
-    return bestIndex,bestValue#returns the best feature to split on and the value used for that split
+
+    # returns the best feature to split on and the value used for that split
+    return bestIndex, bestValue
 
 def createTree(dataSet, leafType=regLeaf, errType=regErr, ops=(1,4)):#assume dataSet is NumPy Mat so we can array filtering
     feat, val = chooseBestSplit(dataSet, leafType, errType, ops)#choose the best split
@@ -86,21 +91,7 @@ def createTree(dataSet, leafType=regLeaf, errType=regErr, ops=(1,4)):#assume dat
     lSet, rSet = binSplitDataSet(dataSet, feat, val)
     retTree['left'] = createTree(lSet, leafType, errType, ops)
     retTree['right'] = createTree(rSet, leafType, errType, ops)
-    return retTree
-
-# myMat = mat(loadDataSet('ex2.txt'))
-# tree = createTree(myMat)
-# print tree
-#
-# import matplotlib
-# matplotlib.use('TkAgg')
-# import matplotlib.pyplot as plt
-#
-# fig = plt.figure()
-# ax = fig.add_subplot(111)
-# ax.scatter(myMat[:, 0].flatten().A[0], myMat[:, 1].flatten().A[0], s=2, c='red')
-# plt.show()
-
+    return retTree  
 
 def isTree(obj):
     return (type(obj).__name__=='dict')
@@ -110,8 +101,7 @@ def getMean(tree):
     if isTree(tree['left']): tree['left'] = getMean(tree['left'])
     return (tree['left']+tree['right'])/2.0
     
-def prune(prevTree, testData):
-    tree = prevTree.copy()
+def prune(tree, testData):
     if shape(testData)[0] == 0: return getMean(tree) #if we have no test data collapse the tree
     if (isTree(tree['right']) or isTree(tree['left'])):#if the branches are not trees try to prune them
         lSet, rSet = binSplitDataSet(testData, tree['spInd'], tree['spVal'])
@@ -124,42 +114,12 @@ def prune(prevTree, testData):
             sum(power(rSet[:,-1] - tree['right'],2))
         treeMean = (tree['left']+tree['right'])/2.0
         errorMerge = sum(power(testData[:,-1] - treeMean,2))
-        if errorMerge < errorNoMerge:
-            # print "merging"
+        if errorMerge < errorNoMerge: 
+            print "merging"
             return treeMean
         else: return tree
     else: return tree
-
-
-def getDepth(tree):
-    left = 1
-    right = 1
-    if isTree(tree['left']):
-        left = getDepth(tree['left']) + 1
-    if isTree(tree['right']):
-        right = getDepth(tree['right']) + 1
-    return max(left, right)
-
-def getTotalNode(tree):
-    left = 1
-    right = 1
-    if isTree(tree['left']):
-        left = getTotalNode(tree['left']) + 1
-    if isTree(tree['right']):
-        right = getTotalNode(tree['right']) + 1
-    return left + right
-
-myMat = mat(loadDataSet('exp2.txt'))
-tree = createTree(myMat, modelLeaf, modelErr, ops=(1, 10))
-# myMatTest = mat(loadDataSet('ex2test.txt'))
-# tree2 = prune(tree, myMatTest)
-
-print tree
-print getDepth(tree)
-print getTotalNode(tree)
-# print getDepth(tree2)
-# print getTotalNode(tree2)
-
+    
 def regTreeEval(model, inDat):
     return float(model)
 
