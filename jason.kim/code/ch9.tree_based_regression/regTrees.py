@@ -5,6 +5,10 @@ Tree-Based Regression Methods
 '''
 from numpy import *
 
+import sys
+print sys.version_info
+print sys.version
+
 def loadDataSet(fileName):      #general function to parse tab -delimited floats
     dataMat = []                #assume last column is target value
     fr = open(fileName)
