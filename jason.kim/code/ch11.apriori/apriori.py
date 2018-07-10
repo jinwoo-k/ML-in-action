@@ -120,7 +120,7 @@ def rulesFromConseq(freqSet, H, supportData, brl, minConf=0.7):
         if (len(Hmp1) > 1):    #need at least two sets to merge
             rulesFromConseq(freqSet, Hmp1, supportData, brl, minConf)
 
-# print generateRules(l, support, 0.5)
+print generateRules(l, support, 0.5)
 
 def pntRules(ruleList, itemMeaning):
     for ruleTup in ruleList:
