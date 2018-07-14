@@ -130,14 +130,14 @@ def createInitSet(dataSet):
         retDict[frozenset(trans)] = 1
     return retDict
 
-# ds = createInitSet(loadSimpDat())
-# tree, headTable = createTree(ds, 3)
-# # tree.disp()
-# # print findPrefixPath(headTable['r'][1])
+ds = createInitSet(loadSimpDat())
+tree, headTable = createTree(ds, 3)
+# tree.disp()
+# print findPrefixPath(headTable['r'][1])
 #
-# freqItems = []
-# mineTree(headTable, 3, set([]), freqItems)
-# print freqItems
+freqItems = []
+mineTree(headTable, 3, set([]), freqItems)
+print freqItems
 
 
 import twitter
